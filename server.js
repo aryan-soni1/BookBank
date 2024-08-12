@@ -1,31 +1,38 @@
 const express = require("express");
 const app = express();
-const connectDB = require('./config/db')
-const routes = require("./Routes/routes")
-const cookieParser = require("cookie-parser")
-const {cloudinaryConnect} = require("./config/cloudinary")
-const fileUpload = require("express-fileupload")
-
+const connectDB = require('./config/db');
+const routes = require("./Routes/routes");
+const cookieParser = require("cookie-parser");
+const { cloudinaryConnect } = require("./config/cloudinary");
+const fileUpload = require("express-fileupload");
 require("dotenv").config();
-const port = process.env.PORT
-connectDB()
 
-app.use(express.json());
-app.use(cookieParser());
+// Port from environment variables
+const port = process.env.PORT;
+
+// Connect to the MongoDB database
+connectDB();
+
+// Middleware setup
+app.use(express.json());           // Parse JSON bodies
+app.use(cookieParser());          // Parse cookies
 app.use(fileUpload({
-    useTempFiles: true,
-    tempFileDir: "/tmp",
-  }));
-  
-  // Cloudinary connection
-  cloudinaryConnect();
-  console.log("cloudinary connected successfully")
-app.use("/",routes)
+    useTempFiles: true,           // Use temporary files for uploads
+    tempFileDir: "/tmp",          // Directory for temporary files
+}));
 
-app.get("/",(req,res)=>{
-    res.send("hello bro what is your mobile number")
-})
+// Connect to Cloudinary for file management
+cloudinaryConnect();
 
-app.listen(port,()=>{
-    console.log("server is listening at port ",port)
-})
+// Set up routes
+app.use("/api/v1/", routes);
+
+// Basic route for testing
+app.get("/", (req, res) => {
+    res.send("Hello! What's up?");
+});
+
+// Start the server
+app.listen(port, () => {
+    console.log(`Server is listening at port ${port}`);
+});

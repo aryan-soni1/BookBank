@@ -1,8 +1,9 @@
 const User = require("../models/Users.models");
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken")
+const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
+// Controller to handle user registration
 exports.register = async (req, res) => {
     const { name, email, password, accountType } = req.body;
 
@@ -19,7 +20,7 @@ exports.register = async (req, res) => {
     if (!validAccountTypes.includes(accountType)) {
         return res.status(400).json({
             success: false,
-            message: "Invalid account type. Must be 'reader', 'Author', or 'Admin'"
+            message: "Invalid account type. Must be 'Reader', 'Author', or 'Admin'"
         });
     }
 
@@ -32,7 +33,7 @@ exports.register = async (req, res) => {
         });
     }
 
-    // Hash the password
+    // Hash the password before saving it to the database
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create the new user
@@ -43,17 +44,16 @@ exports.register = async (req, res) => {
         accountType
     });
 
-    res.status(200).json({
+    // Respond with success message and user details
+    res.status(201).json({
         success: true,
         message: "User registered successfully",
         user: newUser
     });
 };
 
-
-
+// Controller to handle user login
 exports.login = async (req, res) => {
-    // Destructure necessary fields from the request body
     const { email, password } = req.body;
 
     // Check if both email and password are provided
@@ -103,7 +103,7 @@ exports.login = async (req, res) => {
     // Generate a JWT token for the authenticated user
     let token;
     try {
-        token = jwt.sign({ id: user._id , accountType:user.accountType}, process.env.JWT_SECRET, {
+        token = jwt.sign({ id: user._id, accountType: user.accountType }, process.env.JWT_SECRET, {
             expiresIn: "8h", // Token expires in 8 hours
         });
     } catch (error) {
@@ -123,4 +123,36 @@ exports.login = async (req, res) => {
         message: "User logged in successfully",
         token,
     });
+};
+
+// Controller to get user details, including populated books field
+exports.getUserDetails = async (req, res) => {
+    console.log("Fetching user details");
+
+    const { id } = req.user; // Extract user ID from request object
+  
+    try {
+        // Find the user by ID and populate the 'books' field with details
+        const user = await User.findById(id).populate('books'); // Populating the books array with the full book details
+        console.log("User details:", user);
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found",
+            });
+        }
+  
+        res.status(200).json({
+            success: true,
+            message: "User details fetched successfully",
+            data: user,
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: error.message,
+        });
+    }
 };
