@@ -15,7 +15,7 @@ exports.register = async (req, res) => {
     }
 
     // Validate accountType
-    const validAccountTypes = ["reader", "Author", "Admin"];
+    const validAccountTypes = ["Reader", "Author", "Admin"];
     if (!validAccountTypes.includes(accountType)) {
         return res.status(400).json({
             success: false,
