@@ -10,7 +10,7 @@ exports.createBook = async (req, res) => {
   if (!title || !Author || !Year) {
     return res.status(400).json({
       success: false,
-      message: "All fields are required",
+      message: "All fields are required!",
     });
   }
 
@@ -18,7 +18,7 @@ exports.createBook = async (req, res) => {
   if (!req.files || !req.files.cover) {
     return res.status(400).json({
       success: false,
-      message: "Cover image is required",
+      message: "Cover image is required!",
     });
   }
 
